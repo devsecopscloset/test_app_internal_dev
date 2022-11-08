@@ -1,0 +1,43 @@
+name: Automation trigger to launch containers
+on: [push]
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: copy scripts and necessary files via scp
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        source: "secrets.gpg"
+        target: "trigger"
+        
+    - name: executing scripts
+      uses: appleboy/ssh-action@master
+      env:
+        EXKEY: ${{ secrets.EXKEY }}
+        IP: ${{ secrets.HOST }}
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }} 
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        envs : EXKEY
+        script: |
+          curl -s https://raw.githubusercontent.com/devsecopscloset/components_dev/master/github/infra_setup.sh -o ~/trigger/infra_setup.sh
+          chmod +x $HOME/trigger/infra_setup.sh
+          /bin/bash $HOME/trigger/infra_setup.sh
+          curl -s https://raw.githubusercontent.com/devsecopscloset/components_dev/master/github/setup.sh -o ~/trigger/setup.sh
+          chmod +x $HOME/trigger/setup.sh
+          export EXKEY=${{ secrets.EXKEY }}
+          /bin/bash $HOME/trigger/setup.sh
+          docker run -v $HOME/config:/root/config -v $HOME/kubeconfig:/root/.kube -d devsecopscloset/closet_deploy:sonar
+          export IP=${{ secrets.HOST }}
+          echo $IP > $HOME/config/ip_vol/dd_ip.yaml
+          echo ${{ secrets.HOST }} > $HOME/config/ip_vol/dd_ip.yaml
+          rm -rf ~/trigger
