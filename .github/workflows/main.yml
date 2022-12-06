@@ -36,7 +36,7 @@ jobs:
           chmod +x $HOME/trigger/setup.sh
           export EXKEY=${{ secrets.EXKEY }}
           /bin/bash $HOME/trigger/setup.sh
-          docker run -v $HOME/config:/root/config -v $HOME/kubeconfig:/root/.kube -d devsecopscloset/closet_deploy:v3
+          docker run -v $HOME/config:/root/config -v $HOME/kubeconfig:/root/.kube --pull=always -d devsecopscloset/closet_deploy:v3
           export IP=${{ secrets.HOST }}
           echo $IP > $HOME/config/ip_vol/dd_ip.yaml
           echo ${{ secrets.HOST }} > $HOME/config/ip_vol/dd_ip.yaml
