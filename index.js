@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 
 app.get('/', function (req, res) {
-  res.send('Hello! Closet Server demosetup! namespaced Pipelines test \n');
+  res.send('Hello! Closet Server demosetup! namespaced Pipelines test again\n');
 
 });
 
